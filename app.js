@@ -27,15 +27,8 @@ let diaryStatisticRouter = require('./routes/statistic')
 
 let routerDiary          = require('./routes/diary')
 let routerDiaryCategory  = require('./routes/diary-category')
-let routerDict           = require('./routes/dict')
 let routerBankCard       = require('./routes/bankCard')
 let routerBill           = require('./routes/bill')
-let routerQr             = require('./routes/qr')
-let routerQrManager      = require('./routes/qr-manager')
-let routerVPS            = require('./routes/vps')
-
-let routerThumbsUp       = require('./routes/thumbs-up')
-
 
 
 app.use('/'           , indexRouter)
@@ -45,13 +38,8 @@ app.use('/statistic'  , diaryStatisticRouter)
 
 app.use('/diary'          , routerDiary)
 app.use('/diary-category' , routerDiaryCategory)
-app.use('/dict'           , routerDict)          // 词库保存
 app.use('/bank-card'      , routerBankCard)      // 银行卡列表
 app.use('/bill'           , routerBill)          // 账单
-app.use('/qr'             , routerQr)            // QR 二维码
-app.use('/qr-manager'     , routerQrManager)     // QR 二维码
-app.use('/vps'            , routerVPS)           // 搬瓦工 VPS
-app.use('/thumbs-up'      , routerThumbsUp)      // 获取点赞初始计数
 
 
 

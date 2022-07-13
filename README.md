@@ -48,26 +48,6 @@
 - /diary-category/delete
 - /diary-category/modify
 - /diary-category/list
-
-
-# 5. 码表项目 `2022-04-24`
-- /dict/pull
-- /dict/push
-
-# 6. 二维码项目 `2022-05-18`
-- /qr-manager/list
-- /qr-manager/detail
-- /qr-manager/add
-- /qr-manager/modify
-- /qr-manager/delete
-- /qr-manager/clear-visit-count
-
-# 7. 二维码前端信息
-- /qr/ # 码的信息 `2022-05-18`
-
-# 8. VPS主机信息接口
-- /vps/ # vps 信息
-
 ```
 
 
