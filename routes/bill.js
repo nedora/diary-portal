@@ -110,7 +110,7 @@ function processBillOfDay(billContent, date){
     }
     strArray.forEach(item => {
         let itemInfos = item.split(' ')
-        let price = Number(itemInfos[1])
+        let price = Number(itemInfos[1]) || 0
         if (price < 0) {
             response.sumOutput = response.sumOutput + price
         } else {
