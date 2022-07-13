@@ -160,68 +160,6 @@ CREATE TABLE \`diaries\`  (
   PRIMARY KEY (\`id\`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET utf8 COLLATE utf8_general_ci ROW_FORMAT = Compact;
 
--- ----------------------------
--- Table structure for qrs
--- ----------------------------
-DROP TABLE IF EXISTS \`qrs\`;
-CREATE TABLE \`qrs\`  (
-  \`hash\` varchar(200) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'hash',
-  \`is_public\` int(11) NOT NULL DEFAULT 0 COMMENT '是否启用',
-  \`message\` varchar(1000) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '挪车说明',
-  \`description\` varchar(1000) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '简介',
-  \`switch_phone\` int(11) NOT NULL DEFAULT 0 COMMENT '手机号 - 显示开关',
-  \`car\` varchar(100) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '车辆标题',
-  \`car_plate\` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '车牌号',
-  \`switch_car\` int(11) NOT NULL DEFAULT 0 COMMENT '车辆 - 显示开关',
-  \`car_desc\` varchar(1000) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL COMMENT '车辆描述',
-  \`switch_wx\` int(11) NOT NULL DEFAULT 0 COMMENT '微信二维码 - 显示开关',
-  \`switch_homepage\` int(11) NOT NULL DEFAULT 0 COMMENT '个人主页 - 显示开关',
-  \`switch_gaode\` int(11) NOT NULL DEFAULT 0 COMMENT '高德组队邀请码 - 显示开关',
-  \`date_modify\` datetime(0) NULL DEFAULT NULL COMMENT '最后编辑日期',
-  \`date_init\` datetime(0) NULL DEFAULT NULL COMMENT '注册时间',
-  \`visit_count\` int(11) NOT NULL DEFAULT 0 COMMENT '被访问次数',
-  \`uid\` int(6)  NOT NULL COMMENT '所属用户 uid',
-  PRIMARY KEY (\`hash\`) USING BTREE,
-  INDEX \`username\`(\`uid\`) USING BTREE,
-  CONSTRAINT \`code_ibfk_1\` FOREIGN KEY (\`uid\`) REFERENCES \`users\` (\`uid\`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci ROW_FORMAT = Compact;
-
-
--- ----------------------------
--- Table structure for wubi_dict
--- ----------------------------
-DROP TABLE IF EXISTS \`wubi_dict\`;
-CREATE TABLE \`wubi_dict\`  (
-  \`id\` int(11) NOT NULL AUTO_INCREMENT,
-  \`title\` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '码表名',
-  \`content\` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '码表内容',
-  \`content_size\` int(6) NULL DEFAULT NULL COMMENT '码表内容字数',
-  \`word_count\` int(6) NULL DEFAULT NULL COMMENT '码表内容的词条数',
-  \`date_init\` datetime(0) NOT NULL COMMENT '首次上传时间',
-  \`date_update\` datetime(0) NULL DEFAULT NULL COMMENT '最后同步时间',
-  \`comment\` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '注释',
-  \`uid\` int(11) NULL DEFAULT NULL COMMENT '所属用户',
-  PRIMARY KEY (\`id\`, \`title\`) USING BTREE,
-  INDEX \`uid\`(\`uid\`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
-
-
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for thumbs_up
--- ----------------------------
-DROP TABLE IF EXISTS \`thumbs_up\`;
-CREATE TABLE \`thumbs_up\`  (
-  \`up_key\` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  \`up_count\` int(11) NOT NULL DEFAULT 0 COMMENT '点赞数',
-  \`title\` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '说明',
-  \`link_address\` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '部署地址',
-  \`date_init\` datetime(0) NOT NULL COMMENT '添加地址',
-  PRIMARY KEY (\`up_key\`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
-
 
 SET FOREIGN_KEY_CHECKS = 1;
 `
