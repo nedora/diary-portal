@@ -62,8 +62,6 @@ router.get('/category', (req, res, next) => {
         .then(categoryListData => {
             if (categoryListData) {
                 // categoryListData = [{"id": 1, "name_en": "life", "name": "生活", "count": 0, "color": "#FF9500", "date_init": "2022-03-23T13:23:02.000Z"}]
-
-                console.log(categoryListData)
                 let tempArray = categoryListData.map(item => {
                     return `count(case when category='${item.name_en}' then 1 end) as ${item.name_en}`
                 })
