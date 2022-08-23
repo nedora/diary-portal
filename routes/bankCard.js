@@ -6,9 +6,9 @@ const ResponseError = require('../response/ResponseError')
 
 router.get('/', (req, res, next) => {
     let sqlArray = []
-    sqlArray.push(`select * from diaries where title = '银行卡列表' and uid = ${req.query.uid}`) // 固定 '银行卡列表' 为标题的日记作为存储银行卡列表
+    sqlArray.push(`select * from diaries where title = '我的银行卡列表' and uid = ${req.query.uid}`) // 固定 '银行卡列表' 为标题的日记作为存储银行卡列表
     // 1. 先查询出日记结果
-    utility.getDataFromDB(sqlArray, true)
+    utility.getDataFromDB( 'diary', sqlArray, true)
         .then(data => {
             if (data) {
                 // decode unicode
