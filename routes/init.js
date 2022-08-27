@@ -36,7 +36,7 @@ router.get('/', (req, res, next) => {
                                     res.send(
                                         '数据库初始化成功：<br>' +
                                         '数据库名： diary<br>' +
-                                        '创建四张表：users、user_group、diaries、qrs、 <br>' +
+                                        '创建四张表：users、user_group、diaries、qrs <br>' +
                                         '已创建数据库锁定文件： ' + LOCK_FILE_NAME
                                     )
                                 }
@@ -67,6 +67,7 @@ function createTables(){
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+USE diary;
 
 -- ----------------------------
 -- Table structure for diary_category
