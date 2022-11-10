@@ -6,19 +6,21 @@ const ResponseError = require('../response/ResponseError')
 
 
 router.get('/', (req, res, next) => {
-    utility.verifyAuthorization(req)
+    utility
+        .verifyAuthorization(req)
         .then(verified => {
             // let startPoint = (req.query.pageNo - 1) * req.query.pageCount // 日记起点
             let sqlArray = []
             sqlArray.push(`SELECT *from diaries where uid='${req.query.uid}' and category = 'bill' order by date asc`)
-            utility.getDataFromDB( 'diary', sqlArray)
+            utility
+                .getDataFromDB( 'diary', sqlArray)
                 .then(billDiaryList => {
                     utility.updateUserLastLoginTime(req.query.email)
                     let billResponse = []
 
                     billDiaryList.forEach(diary => {
                         // decode unicode
-                        billResponse.push(processBillOfDay(diary.content, diary.date))
+                        billResponse.push(utility.processBillOfDay(diary.content, diary.date))
                     })
                     res.send(new ResponseSuccess(billResponse, '请求成功'))
                 })
@@ -33,7 +35,8 @@ router.get('/', (req, res, next) => {
 
 
 router.get('/sorted', (req, res, next) => {
-    utility.verifyAuthorization(req)
+    utility
+        .verifyAuthorization(req)
         .then(verified => {
             let yearNow = new Date().getFullYear()
             let sqlRequests = []
@@ -72,7 +75,7 @@ router.get('/sorted', (req, res, next) => {
 
                         // 用一次循环处理完所有需要在循环中处理的事：合总额、map DayArray
                         daysArray.forEach(item => {
-                            let processedDayData = processBillOfDay(item.content, item.date)
+                            let processedDayData = utility.processBillOfDay(item.content, item.date)
                             daysData.push(processedDayData)
                             monthSum = monthSum + processedDayData.sum
                             monthSumIncome = monthSumIncome + processedDayData.sumIncome
@@ -87,14 +90,14 @@ router.get('/sorted', (req, res, next) => {
                             month: daysArray[0].month,
                             count: daysArray.length,
                             days: daysData,
-                            sum: money(monthSum),
-                            sumIncome: money(monthSumIncome),
-                            sumOutput: money(monthSumOutput),
+                            sum: utility.formatMoney(monthSum),
+                            sumIncome: utility.formatMoney(monthSumIncome),
+                            sumOutput: utility.formatMoney(monthSumOutput),
                             food: {
-                                breakfast: money(food.breakfast),
-                                launch: money(food.launch),
-                                dinner: money(food.dinner),
-                                sum: money(food.breakfast + food.launch + food.dinner)
+                                breakfast: utility.formatMoney(food.breakfast),
+                                launch: utility.formatMoney(food.launch),
+                                dinner: utility.formatMoney(food.dinner),
+                                sum: utility.formatMoney(food.breakfast + food.launch + food.dinner)
                             }
                         })
                     })
@@ -111,39 +114,5 @@ router.get('/sorted', (req, res, next) => {
 })
 
 
-// 处理某天的 bill 内容
-function processBillOfDay(billContent, date){
-    let str = billContent.replace(/ +/g, ' ') // 替换掉所有多个空格的间隔，改为一个空格
-    let strArray = str.split('\n').filter(item => item.trim().length > 0)
-
-    let response = {
-        date: date,
-        items: [],
-        sum: 0,
-        sumIncome: 0,
-        sumOutput: 0
-    }
-    strArray.forEach(item => {
-        let itemInfos = item.split(' ')
-        let price = Number(itemInfos[1]) || 0 // 避免账单填写出错的情况
-        if (price < 0) {
-            response.sumOutput = response.sumOutput + price
-        } else {
-            response.sumIncome = response.sumIncome + price
-        }
-        response.sum = response.sum + price
-
-        response.items.push({
-            item: itemInfos[0],
-            price: price
-        })
-    })
-
-    return response
-}
-
-function money(number){
-    return Number(number.toFixed(2))
-}
 
 module.exports = router
