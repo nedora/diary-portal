@@ -77,7 +77,7 @@ router.put('/modify', (req, res, next) => {
                     name = '${req.body.name}',
                     count = '${req.body.count}',
                     color = '${req.body.color}',
-                    sort_id = ${req.body.sort_id},
+                    sort_id = ${req.body.sort_id}
                     where name_en = '${req.body.name_en}'
                     `)
                 utility.getDataFromDB( 'diary', sqlArray)
