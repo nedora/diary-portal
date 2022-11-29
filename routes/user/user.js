@@ -1,8 +1,8 @@
 const express = require('express')
-const configProject = require('../config/configProject')
-const utility = require("../config/utility");
-const ResponseSuccess = require("../response/ResponseSuccess");
-const ResponseError = require("../response/ResponseError");
+const configProject = require('../../config/configProject')
+const utility = require("../../config/utility");
+const ResponseSuccess = require("../../response/ResponseSuccess");
+const ResponseError = require("../../response/ResponseError");
 const router = express.Router()
 const bcrypt = require('bcrypt')
 
@@ -42,7 +42,8 @@ router.post('/register', (req, res, next) => {
                                     '2'
                                     )`
                         )
-                        utility.getDataFromDB( 'diary', sqlArray)
+                        utility
+                            .getDataFromDB( 'diary', sqlArray)
                             .then(data => {
                                 res.send(new ResponseSuccess('', '注册成功'))
                             })
@@ -73,7 +74,8 @@ function checkEmailOrUserNameExist(email, username){
 }
 
 router.get('/list', (req, res, next) => {
-    utility.verifyAuthorization(req)
+    utility
+        .verifyAuthorization(req)
         .then(userInfo => {
             let sqlArray = []
             sqlArray.push(`SELECT * from users `)
@@ -81,7 +83,7 @@ router.get('/list', (req, res, next) => {
             if (userInfo.group_id === 1){
 
             } else {
-                sqlArray.push([`where uid = ${req.query.uid}`])
+                sqlArray.push([`where uid = ${userInfo.uid}`])
             }
 
 
@@ -100,15 +102,16 @@ router.get('/list', (req, res, next) => {
                 sqlArray.push(`limit ${startPoint}, ${req.query.pageCount}`)
             }
 
-            utility.getDataFromDB( 'diary', sqlArray)
-                .then(data => {
-                    utility.updateUserLastLoginTime(req.query.email)
-                    data.forEach(diary => {
+            utility
+                .getDataFromDB( 'diary', sqlArray)
+                .then(dataDiary => {
+                    utility.updateUserLastLoginTime(userInfo.uid)
+                    dataDiary.forEach(diary => {
                         // decode unicode
                         diary.title = utility.unicodeDecode(diary.title)
                         diary.content = utility.unicodeDecode(diary.content)
                     })
-                    res.send(new ResponseSuccess(data, '请求成功'))
+                    res.send(new ResponseSuccess(dataDiary, '请求成功'))
                 })
                 .catch(err => {
                     res.send(new ResponseError(err, err.message))
@@ -122,7 +125,8 @@ router.get('/list', (req, res, next) => {
 router.get('/detail', (req, res, next) => {
     let sqlArray = []
     sqlArray.push(`select * from qrs where hash = '${req.query.hash}'`)
-    utility.getDataFromDB( 'diary', sqlArray, true)
+    utility
+        .getDataFromDB( 'diary', sqlArray, true)
         .then(data => {
             // decode unicode
             data.message = utility.unicodeDecode(data.message)
@@ -134,25 +138,26 @@ router.get('/detail', (req, res, next) => {
                 res.send(new ResponseSuccess(data))
             } else {
                 // 2.2 如果不是，需要判断：当前 email 和 token 是否吻合
-                utility.verifyAuthorization(req)
-                    .then(verified => {
+                utility
+                    .verifyAuthorization(req)
+                    .then(userInfo => {
                         // 3. 判断 QR 是否属于当前请求用户
-                        if (Number(req.query.uid) === data.uid){
+                        if (Number(userInfo.uid) === data.uid){
                             // 记录最后访问时间
-                            utility.updateUserLastLoginTime(req.query.email)
+                            utility.updateUserLastLoginTime(userInfo.uid)
                             /*                            // TODO:过滤可见信息 自己看，管理员看，其它用户看
-                                                        if (data.switch_wx){
+                                                        if (data.is_show_wx){
                                                             data.wx = ''
                                                         }
-                                                        if (data.switch_car){
+                                                        if (data.is_show_car){
                                                             data.car = ''
                                                             data.car_desc = ''
                                                             data.car_plate = ''
                                                         }
-                                                        if (data.switch_gaode){
+                                                        if (data.is_show_gaode){
                                                             data.gaode = ''
                                                         }
-                                                        if (data.switch_homepage){
+                                                        if (data.is_show_homepage){
                                                             data.homepage = ''
                                                         }*/
                             res.send(new ResponseSuccess(data))
@@ -199,7 +204,8 @@ router.post('/add', (req, res, next) => {
                                     '${req.body.group_id}'
                                     )`
                     )
-                    utility.getDataFromDB( 'diary', sqlArray)
+                    utility
+                        .getDataFromDB( 'diary', sqlArray)
                         .then(data => {
                             res.send(new ResponseSuccess('', '用户添加成功'))
                         })
@@ -226,10 +232,11 @@ function checkHashExist(username, email){
 router.put('/modify', (req, res, next) => {
 
     // 1. 验证用户信息是否正确
-    utility.verifyAuthorization(req)
+    utility
+        .verifyAuthorization(req)
         .then(userInfo => {
             if (userInfo.group_id === 1) {
-                operateUserInfo(req, res)
+                operateUserInfo(req, res, userInfo)
             } else {
                 if (userInfo.uid !== req.body.uid){
                     res.send(new ResponseError('', '你无权操作该用户信息'))
@@ -243,7 +250,7 @@ router.put('/modify', (req, res, next) => {
         })
 })
 
-function operateUserInfo(req, res){
+function operateUserInfo(req, res, userInfo){
     let sqlArray = []
     sqlArray.push(`
                         update users
@@ -260,9 +267,10 @@ function operateUserInfo(req, res){
                             WHERE uid='${req.body.uid}'
                     `)
 
-    utility.getDataFromDB( 'diary', sqlArray, true)
+    utility
+        .getDataFromDB( 'diary', sqlArray, true)
         .then(data => {
-            utility.updateUserLastLoginTime(req.query.email)
+            utility.updateUserLastLoginTime(userInfo.uid)
             res.send(new ResponseSuccess(data, '修改成功'))
         })
         .catch(err => {
@@ -272,7 +280,8 @@ function operateUserInfo(req, res){
 
 router.delete('/delete', (req, res, next) => {
     // 1. 验证用户信息是否正确
-    utility.verifyAuthorization(req)
+    utility
+        .verifyAuthorization(req)
         .then(userInfo => {
             if (userInfo.group_id === 1){
                 let sqlArray = []
@@ -280,7 +289,8 @@ router.delete('/delete', (req, res, next) => {
                         DELETE from users
                         WHERE uid='${req.body.uid}'
                     `)
-                utility.getDataFromDB( 'diary', sqlArray)
+                utility
+                    .getDataFromDB( 'diary', sqlArray)
                     .then(data => {
                         if (data.affectedRows > 0) {
                             utility.updateUserLastLoginTime(req.body.email)
@@ -305,7 +315,8 @@ router.post('/login', (req, res, next) => {
     let sqlArray = []
     sqlArray.push(`select * from users where email = '${req.body.email}'`)
 
-    utility.getDataFromDB( 'diary', sqlArray, true)
+    utility
+        .getDataFromDB( 'diary', sqlArray, true)
         .then(data => {
             if (data) {
                 bcrypt.compare(req.body.password, data.password, function(err, isPasswordMatch) {
@@ -336,14 +347,16 @@ router.put('/change-password', (req, res, next) => {
         res.send(new ResponseError('', '演示账户密码不允许修改'))
         return
     }
-    utility.verifyAuthorization(req)
+    utility
+        .verifyAuthorization(req)
         .then(userInfo => {
             if (userInfo.password === req.query.token){
                 bcrypt.hash(req.body.password, 10, (err, encryptPasswordNew) => {
                     let changePasswordSqlArray = [`update users set password = '${encryptPasswordNew}' where email='${req.query.email}'`]
-                    utility.getDataFromDB( 'diary', changePasswordSqlArray)
+                    utility
+                        .getDataFromDB( 'diary', changePasswordSqlArray)
                         .then(dataChangePassword => {
-                            utility.updateUserLastLoginTime(req.query.email)
+                            utility.updateUserLastLoginTime(userInfo.uid)
                             res.send(new ResponseSuccess('', '修改密码成功'))
                         })
                         .catch(errChangePassword => {

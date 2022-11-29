@@ -22,13 +22,13 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 let init                 = require('./routes/init')
 let indexRouter          = require('./routes/index')
-let usersRouter          = require('./routes/user')
+let usersRouter          = require('./routes/user/user')
 let diaryStatisticRouter = require('./routes/statistic')
 
-let routerDiary          = require('./routes/diary')
-let routerDiaryCategory  = require('./routes/diary-category')
-let routerBankCard       = require('./routes/bankCard')
-let routerBill           = require('./routes/bill')
+let routerDiary          = require('./routes/diary/diary')
+let routerDiaryCategory  = require('./routes/diary/diary-category')
+let routerBankCard       = require('./routes/diary/bankCard')
+let routerBill           = require('./routes/diary/bill')
 
 
 app.use('/'           , indexRouter)

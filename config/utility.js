@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const configDatabase = require('./configDatabase')
+const configProject = require('./configProject')
 
 // 运行 SQL 并返回 DB 结果
 function getDataFromDB(dbName, sqlArray, isSingleValue) {
@@ -35,23 +36,22 @@ function getDataFromDB(dbName, sqlArray, isSingleValue) {
 
 // 验证用户是否有权限
 function verifyAuthorization(req){
-    let sqlArray = []
-    sqlArray.push(`select * from users where uid = ${req.query.uid}`)
-    // console.log('sqlArray: ',sqlArray)
+    let token = req.get(configProject.TOKEN_NAME) || req.query.token
     return new Promise((resolve, reject) => {
-        getDataFromDB( 'diary', sqlArray, true)
-            .then(data => {
-                // console.log('sqlResult: ', data.password, req.query.token)
-                if (data.password === req.query.token){
-                    resolve(data) // 如果查询成功，返回查询结果
-                } else {
-                    reject (false)
-                }
-            })
-            .catch(err => {
-                console.log('验证权限失败', err, err.message)
-                reject(false)
-            })
+        if (!token){
+            reject ('无 token')
+        } else {
+            let sqlArray = []
+            sqlArray.push(`select * from users where password = '${token}'`)
+            getDataFromDB( 'diary', sqlArray, true)
+                .then(userInfo => {
+                    resolve(userInfo) // 如果查询成功，返回 用户id
+                })
+                .catch(err => {
+                    console.log('验证权限失败', err, err.message)
+                    reject(false)
+                })
+        }
     })
 }
 
@@ -102,9 +102,9 @@ function  unicodeDecode(str)
     return unescape(text);
 }
 
-function updateUserLastLoginTime(email){
+function updateUserLastLoginTime(uid){
     let timeNow = dateFormatter(new Date())
-    getDataFromDB( 'diary', [`update users set last_visit_time='${timeNow}' where email='${email}'`])
+    getDataFromDB( 'diary', [`update users set last_visit_time='${timeNow}' where uid='${uid}'`])
         .then(data => {
             console.log('--- 成功：记录用户最后操作时间')
         })
