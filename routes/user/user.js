@@ -97,9 +97,9 @@ router.get('/list', (req, res, next) => {
                 }
             }
 
-            if (req.query.pageNo && req.query.pageCount){
-                let startPoint = (req.query.pageNo - 1) * req.query.pageCount //  QR 起点
-                sqlArray.push(`limit ${startPoint}, ${req.query.pageCount}`)
+            if (req.query.pageNo && req.query.pageSize){
+                let startPoint = (req.query.pageNo - 1) * req.query.pageSize //  QR 起点
+                sqlArray.push(`limit ${startPoint}, ${req.query.pageSize}`)
             }
 
             utility
