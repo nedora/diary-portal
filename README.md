@@ -111,39 +111,40 @@ npm run start
 > 注意：初始化会清空 diary 数据库中的所有内容
 
 
+
 ### 5. 配置 nginx，映射 `localhost:3000` 路径到  `/portal` 路径
 
 1. 打开 nginx 的配置文件，
-  - CentOS 的 nginx 配置文件在 `/etc/nginx/conf.d/` 目录下。
-  - Ubuntu 的 nginx 配置文件在 `/etc/nginx/site-avilable/default` 中。
+- CentOS 的 nginx 配置文件在 `/etc/nginx/conf.d/` 目录下。
+- Ubuntu 的 nginx 配置文件在 `/etc/nginx/site-avilable/default` 中。
 
 2. 打开 `default.conf` 或 `default` 文件
-```bash
-vi default.conf
-```
+    ```bash
+    vi default.conf
+    ```
 
 3. 在 http 内部， server 外部，添加以下内容
 
-```bash
-upstream diary_server {
- server localhost:3000;
- keepalive 2000;
-}
-```
+    ```bash
+     upstream diary_server {
+         server localhost:3000;
+         keepalive 2000;
+     }
+    ```
 
 4. 然后在 server 内部添加：
 
-```bash
-location /portal/ {
-    proxy_pass http://diary_server/; # 这里对应上面的 upsteam 名字
-    proxy_set_header Host $host:$server_port; # 这里照搬就可以
-}
-```
+    ```bash
+    location /portal/ {
+        proxy_pass http://diary_server/; # 这里对应上面的 upstream 名字
+        proxy_set_header Host $host:$server_port; # 这里照搬就可以
+    }
+    ```
 5. 这样，就会将 `localhost:3000` 这个接口映射到 `localhost/portal/` 这个路径下
 6. 重启 nginx 服务
-  ```bash
-systemctl restart nginx
-  ```
+    ```bash
+    systemctl restart nginx
+    ```
 
 ### 6. 配置前端项目
 1. 下载 [https://github.com/KyleBing/diary-vue](https://github.com/KyleBing/diary-vue)
