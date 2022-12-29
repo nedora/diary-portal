@@ -34,6 +34,7 @@ function getDataFromDB(dbName, sqlArray, isSingleValue) {
     })
 }
 
+
 // 验证用户是否有权限
 function verifyAuthorization(req){
     let token = req.get(configProject.TOKEN_NAME) || req.query.token
@@ -49,7 +50,7 @@ function verifyAuthorization(req){
                 })
                 .catch(err => {
                     console.log('验证权限失败', err, err.message)
-                    reject(false)
+                    reject('验证权限失败')
                 })
         }
     })
@@ -115,9 +116,16 @@ function updateUserLastLoginTime(uid){
 
 
 // 处理账单文本内容，转成格式化的账单数据
-function processBillOfDay(billContent, date){
+function processBillOfDay(billContent, date, filterKeywords){
     let str = billContent.replace(/ +/g, ' ') // 替换掉所有多个空格的间隔，改为一个空格
-    let strArray = str.split('\n').filter(item => item.trim().length > 0)
+    let strArray =
+        str
+            .split('\n')
+            .filter(item => item.trim().length > 0)
+            .filter(item => { // {item, price}
+                let reg = new RegExp(`.*(${filterKeywords.join('|')}).*`, 'ig')
+                return reg.test(item)
+            })
 
     let response = {
         date: date,
@@ -151,7 +159,8 @@ function formatMoney(number){
 
 
 module.exports = {
-    getDataFromDB, dateFormatter, updateUserLastLoginTime,
+    getDataFromDB,
+    dateFormatter, updateUserLastLoginTime,
     unicodeEncode, unicodeDecode,
     verifyAuthorization,
     // Bill

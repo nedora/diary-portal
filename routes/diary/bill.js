@@ -43,8 +43,7 @@ router.get('/sorted', (req, res, next) => {
             let sqlArray = []
             for (let month = 1; month <= 12; month ++ ){
                 sqlArray.push(`
-                        select 
-                            *,
+                        select *,
                         date_format(date,'%Y%m') as id,
                         date_format(date,'%m') as month
                         from diaries 
@@ -74,32 +73,39 @@ router.get('/sorted', (req, res, next) => {
                         }
 
                         // 用一次循环处理完所有需要在循环中处理的事：合总额、map DayArray
+                        let keywords = req.query.keyword ? req.query.keyword.split(' ') : []
                         daysArray.forEach(item => {
-                            let processedDayData = utility.processBillOfDay(item.content, item.date)
-                            daysData.push(processedDayData)
-                            monthSum = monthSum + processedDayData.sum
-                            monthSumIncome = monthSumIncome + processedDayData.sumIncome
-                            monthSumOutput = monthSumOutput + processedDayData.sumOutput
-                            food.breakfast = food.breakfast + processedDayData.items.filter(item => item.item.indexOf('早餐') > -1).reduce((a,b) => a.price || 0 + b.price || 0, 0)
-                            food.launch = food.launch + processedDayData.items.filter(item => item.item.indexOf('午餐') > -1).reduce((a,b) => a.price || 0 + b.price || 0, 0)
-                            food.dinner = food.dinner + processedDayData.items.filter(item => item.item.indexOf('晚餐') > -1).reduce((a,b) => a.price || 0 + b.price || 0, 0)
-                        })
-
-                        responseData.push({
-                            id: daysArray[0].id,
-                            month: daysArray[0].month,
-                            count: daysArray.length,
-                            days: daysData,
-                            sum: utility.formatMoney(monthSum),
-                            sumIncome: utility.formatMoney(monthSumIncome),
-                            sumOutput: utility.formatMoney(monthSumOutput),
-                            food: {
-                                breakfast: utility.formatMoney(food.breakfast),
-                                launch: utility.formatMoney(food.launch),
-                                dinner: utility.formatMoney(food.dinner),
-                                sum: utility.formatMoney(food.breakfast + food.launch + food.dinner)
+                            let processedDayData = utility.processBillOfDay(item.content, item.date, keywords)
+                            // 当内容 items 的数量大于 0 时
+                            if (processedDayData.items.length > 0){
+                                daysData.push(processedDayData)
+                                monthSum = monthSum + processedDayData.sum
+                                monthSumIncome = monthSumIncome + processedDayData.sumIncome
+                                monthSumOutput = monthSumOutput + processedDayData.sumOutput
+                                food.breakfast = food.breakfast + processedDayData.items.filter(item => item.item.indexOf('早餐') > -1).reduce((a,b) => a.price || 0 + b.price || 0, 0)
+                                food.launch = food.launch + processedDayData.items.filter(item => item.item.indexOf('午餐') > -1).reduce((a,b) => a.price || 0 + b.price || 0, 0)
+                                food.dinner = food.dinner + processedDayData.items.filter(item => item.item.indexOf('晚餐') > -1).reduce((a,b) => a.price || 0 + b.price || 0, 0)
                             }
                         })
+
+                        if (daysData.length > 0){
+                            responseData.push({
+                                id: daysArray[0].id,
+                                month: daysArray[0].month,
+                                count: daysArray.length,
+                                days: daysData,
+                                sum: utility.formatMoney(monthSum),
+                                sumIncome: utility.formatMoney(monthSumIncome),
+                                sumOutput: utility.formatMoney(monthSumOutput),
+                                food: {
+                                    breakfast: utility.formatMoney(food.breakfast),
+                                    launch: utility.formatMoney(food.launch),
+                                    dinner: utility.formatMoney(food.dinner),
+                                    sum: utility.formatMoney(food.breakfast + food.launch + food.dinner)
+                                }
+                            })
+                        }
+
                     })
                     responseData.sort((a, b) => a.year > b.year ? 1 : -1)
                     res.send(new ResponseSuccess(responseData))
@@ -112,7 +118,6 @@ router.get('/sorted', (req, res, next) => {
             res.send(new ResponseError(verified, '无权查看日记列表：用户信息错误'))
         })
 })
-
 
 
 module.exports = router
