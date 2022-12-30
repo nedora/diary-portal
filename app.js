@@ -1,9 +1,7 @@
 const createError = require('http-errors')
 const express = require('express')
 const path = require('path')
-const cookieParser = require('cookie-parser')
 const logger = require('morgan')
-
 
 
 const app = express()
@@ -13,13 +11,12 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 
 app.use(logger('dev'))
-app.use(express.json())
+app.use(express.json({limit: '50mb'}))
 app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 
-
+// 基础相关
 let init                 = require('./routes/init')
 let indexRouter          = require('./routes/index')
 let usersRouter          = require('./routes/user/user')
@@ -40,6 +37,10 @@ app.use('/diary'          , routerDiary)
 app.use('/diary-category' , routerDiaryCategory)
 app.use('/bank-card'      , routerBankCard)      // 银行卡列表
 app.use('/bill'           , routerBill)          // 账单
+
+
+let routerFile           = require('./routes/file/file')
+app.use('/file'           , routerFile)          // 图片、文件操作
 
 
 
