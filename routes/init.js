@@ -122,6 +122,8 @@ CREATE TABLE \`users\`  (
   \`count_words\` int(8) NULL DEFAULT 0 COMMENT '数量 - 词条',
   \`sync_count\` int(6) NULL DEFAULT 0 COMMENT '同步次数',
   \`avatar\` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT 'avatar图片地址',
+  \`city\` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '城市',
+  \`geolocation\` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '经纬度',
   PRIMARY KEY (\`uid\`, \`email\`) USING BTREE,
   INDEX \`group_id\`(\`group_id\`) USING BTREE,
   INDEX \`uid\`(\`uid\`) USING BTREE,
