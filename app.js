@@ -20,30 +20,32 @@ app.use(express.static(path.join(__dirname, 'public')))
 let init                 = require('./routes/init')
 let indexRouter          = require('./routes/index')
 let usersRouter          = require('./routes/user/user')
-let diaryStatisticRouter = require('./routes/statistic')
+app.use('/'           , indexRouter)
+app.use('/init'       , init)
+app.use('/user'       , usersRouter)
 
+// 邀请码
+let invitationRouter     = require('./routes/user/invitation')
+app.use('/invitation'       , invitationRouter)
+
+// 统计
+let diaryStatisticRouter = require('./routes/statistic')
+app.use('/statistic'  , diaryStatisticRouter)
+
+
+// 日记相关
 let routerDiary          = require('./routes/diary/diary')
 let routerDiaryCategory  = require('./routes/diary/diary-category')
 let routerBankCard       = require('./routes/diary/bankCard')
 let routerBill           = require('./routes/diary/bill')
-
-
-app.use('/'           , indexRouter)
-app.use('/init'       , init)
-app.use('/user'       , usersRouter)
-app.use('/statistic'  , diaryStatisticRouter)
-
 app.use('/diary'          , routerDiary)
 app.use('/diary-category' , routerDiaryCategory)
 app.use('/bank-card'      , routerBankCard)      // 银行卡列表
 app.use('/bill'           , routerBill)          // 账单
 
-
+// 图片、文件操作
 let routerFile           = require('./routes/file/file')
-app.use('/file'           , routerFile)          // 图片、文件操作
-
-
-
+app.use('/file'           , routerFile)
 
 
 // catch 404 and forward to error handler
