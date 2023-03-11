@@ -42,9 +42,23 @@
 # 4. 日记类别管理
 - /diary-category/ # 类别管理 `2022-05-24`
 - /diary-category/add # 类别管理 `2022-05-24`
+- /diary-category/modify # 类别修改 `2022-07-22`
+- /diary-category/list # 类别管理 `2022-05-24`
 - /diary-category/delete
-- /diary-category/modify
-- /diary-category/list
+
+
+# 5. 邀请码管理
+- /invitation/generate # 生成新的
+- /invitation/mark-shared # 标记邀请码为已用
+- /invitation/list # 可用的邀请码列表
+- /invitation/delete # 删除邀请码
+
+# 6. 统计
+- /statistic/ # 统计日记、用户数据
+- /statistic/category # 类别日记数量统计
+- /statistic/year # 年份日记统计
+- /statistic/users # 用户的日记、码表、qr 等数量
+- /statistic/weather # 所有日记的气温信息
 ```
 
 
@@ -111,7 +125,6 @@ npm run start
 > 注意：初始化会清空 diary 数据库中的所有内容
 
 
-
 ### 5. 配置 nginx，映射 `localhost:3000` 路径到  `/portal` 路径
 
 1. 打开 nginx 的配置文件，
@@ -158,7 +171,8 @@ npm run start
 ## 三、开发说明
 
 ### 1. 密码说明
-密码使用 [bcrypt](https://github.com/kelektiv/node.bcrypt.js) 加密，登录后的所有传输都会用加密后的密码作为请求 token
+密码使用 [bcrypt](https://github.com/kelektiv/node.bcrypt.js) 加密，登录后的所有传输都会用加密后的密码作为请求 token  
+token 放到请求头的 `Diary-Token` 字段中
 
 ### 2. 返回数据格式
 
