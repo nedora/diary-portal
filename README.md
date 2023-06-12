@@ -92,7 +92,7 @@ module.exports = {
 module.exports = {
     invitation: '----', // 万能邀请码，用于注册时使用
     adminCount: 'kylebing@163.com', // 管理员账户，该用户可以在统计页面中查看所有用户统计数据
-    TOKEN_NAME: 'Diary-Token', // header 中的 token 字段
+   TOKEN_NAME: 'Diary-Token', // header 中的 token 字段，跟前端约定的 token 名字，不需要刻意修改
 }
 ```
 
@@ -165,8 +165,8 @@ npm run start
 1. 下载 [https://github.com/KyleBing/diary-vue](https://github.com/KyleBing/diary-vue)
 2. 安装依赖，执行 `npm i` 或者 `yarn`
 3. 如果你需要修改前端请求后台的路径，修改 `/src/request.js` 中的 `BASE_URL` 即可
-4. 执行 `npm build` 生成最终项目文件
-5. 放置于服务器 nginx 主目录下的 `/diary/` 下
+4. 执行 `npm build` 生成最终项目文件，生成的项目文件不是 `/dist/`，是 `../diary`，项目根目录 `/archive/` 下会有压缩好的 `/diary/` `.zip` 文件，它是不带 `./diary/` 目录 的，直接上传到服务器解压使用就好。
+5. 放置于服务器 nginx 主目录的 `/diary/` 下
 6. 此时后台项目在 `/portal/` 目录下，前端项目在 `/dairy/` 下，这样就能直接使用了
 
 
