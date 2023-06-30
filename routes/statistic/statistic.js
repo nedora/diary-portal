@@ -1,16 +1,15 @@
 const express = require('express')
 const router = express.Router()
-const utility = require('../config/utility')
-const ResponseSuccess = require("../response/ResponseSuccess");
-const ResponseError = require("../response/ResponseError");
-const configProject = require("../config/configProject")
+const utility = require('../../config/utility')
+const ResponseSuccess = require("../../response/ResponseSuccess");
+const ResponseError = require("../../response/ResponseError");
+const configProject = require("../../config/configProject")
 
 // 统计数据
 router.get('/', (req, res, next) => {
     utility
         .verifyAuthorization(req)
         .then(userInfo => {
-            updateUsersInfo()
             let sqlArray = []
             if (userInfo.group_id === 1) {
                 sqlArray.push(`
@@ -192,34 +191,5 @@ router.get('/weather', (req, res, next) => {
 
 })
 
-// 更新所有用户统计数据
-function updateUsersInfo() {
-    return new Promise((resolve, reject) => {
-        utility
-            .getDataFromDB('diary', [`select * from users`])
-            .then(data => {
-                let sqlArray = []
-                data.forEach(user => {
-                    sqlArray.push(`update users set count_diary = (SELECT count(*) from diaries where uid = ${user.uid}) where uid = ${user.uid};`)
-                    sqlArray.push(`update users set count_dict  = (SELECT count(*) from wubi_dict where uid = ${user.uid}) where uid = ${user.uid};`)
-                    sqlArray.push(`update users set count_qr    = (SELECT count(*) from qrs where uid = ${user.uid}) where uid = ${user.uid};`)
-                })
-                utility
-                    .getDataFromDB('diary', sqlArray, true)
-                    .then(data => {
-                        console.log(`success: user's count diary|dict has updated`)
-                        resolve()
-                    })
-                    .catch(err => {
-                        console.log(`error:  user count diary|dict update`)
-                        reject()
-                    })
-            })
-            .catch(err => {
-                console.log('error: get users info')
-                reject()
-            })
-    })
-}
 
 module.exports = router

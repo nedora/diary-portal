@@ -29,7 +29,7 @@ let invitationRouter     = require('./routes/user/invitation')
 app.use('/invitation'       , invitationRouter)
 
 // 统计
-let diaryStatisticRouter = require('./routes/statistic')
+let diaryStatisticRouter = require('./routes/statistic/statistic')
 app.use('/statistic'  , diaryStatisticRouter)
 
 
