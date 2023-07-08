@@ -4,7 +4,6 @@ const utility = require('../../config/utility')
 const ResponseSuccess = require('../../response/ResponseSuccess')
 const ResponseError = require('../../response/ResponseError')
 
-
 router.get('/list', (req, res, next) => {
     utility
         .verifyAuthorization(req)
@@ -51,6 +50,38 @@ router.get('/list', (req, res, next) => {
             sqlArray.push(` order by date desc
                   limit ${startPoint}, ${req.query.pageSize}`)
 
+            utility
+                .getDataFromDB( 'diary', sqlArray)
+                .then(data => {
+                    utility.updateUserLastLoginTime(userInfo.uid)
+                    data.forEach(diary => {
+                        // decode unicode
+                        diary.title = utility.unicodeDecode(diary.title)
+                        diary.content = utility.unicodeDecode(diary.content)
+                        // 处理账单数据
+                        if (diary.category === 'bill'){
+                            diary.billData = utility.processBillOfDay(diary, [])
+                        }
+                    })
+                    res.send(new ResponseSuccess(data, '请求成功'))
+                })
+                .catch(err => {
+                    res.send(new ResponseError(err, err.message))
+                })
+        })
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
+        })
+})
+
+router.get('/export', (req, res, next) => {
+    utility
+        .verifyAuthorization(req)
+        .then(userInfo => {
+            let sqlArray = []
+            sqlArray.push(`SELECT *
+                  from diaries 
+                  where uid='${userInfo.uid}'`)
             utility
                 .getDataFromDB( 'diary', sqlArray)
                 .then(data => {
@@ -149,8 +180,8 @@ router.get('/temperature', (req, res, next) => {
                     res.send(new ResponseError(err, err.message))
                 })
         })
-        .catch(verified => {
-            res.send(new ResponseError(verified, '无权查看日记列表：用户信息错误'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
         })
 })
 
@@ -190,8 +221,8 @@ router.get('/detail', (req, res, next) => {
                             res.send(new ResponseError('','无权查看该日记：请求用户 ID 与日记归属不匹配'))
                         }
                     })
-                    .catch(unverified => {
-                        res.send(new ResponseError('','无权查看该日记：用户信息错误'))
+                    .catch(errInfo => {
+                        res.send(new ResponseError('', errInfo))
                     })
             }
         })
@@ -227,8 +258,8 @@ router.post('/add', (req, res, next) => {
                     res.send(new ResponseError(err, '添加失败'))
                 })
         })
-        .catch(err => {
-            res.send(new ResponseError(err, '无权操作'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
         })
 })
 
@@ -268,8 +299,8 @@ router.put('/modify', (req, res, next) => {
                     res.send(new ResponseError(err, '修改失败'))
                 })
         })
-        .catch(err => {
-            res.send(new ResponseError(err, '无权操作'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
         })
 })
 
@@ -298,8 +329,33 @@ router.delete('/delete', (req, res, next) => {
                     res.send(new ResponseError(err,))
                 })
         })
-        .catch(err => {
-            res.send(new ResponseError(err, '无权操作'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
+        })
+})
+
+router.post('/clear', (req, res, next) => {
+    utility
+        .verifyAuthorization(req)
+        .then(userInfo => {
+            if (userInfo.email === 'test@163.com'){
+                res.send(new ResponseError('', '演示帐户不允许执行此操作'))
+                return
+            }
+            let sqlArray = []
+            sqlArray.push(`delete from diaries where uid=${userInfo.uid}`)
+            utility
+                .getDataFromDB( 'diary', sqlArray)
+                .then(data => {
+                    utility.updateUserLastLoginTime(userInfo.uid)
+                    res.send(new ResponseSuccess(data, `清空成功：${data.affectedRows} 条日记`))
+                })
+                .catch(err => {
+                    res.send(new ResponseError(err, err.message))
+                })
+        })
+        .catch(verified => {
+            res.send(new ResponseError(verified, '无权查看日记列表：用户信息错误'))
         })
 })
 

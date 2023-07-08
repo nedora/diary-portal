@@ -5,7 +5,7 @@ const ResponseSuccess = require("../../response/ResponseSuccess");
 const ResponseError = require("../../response/ResponseError");
 const configProject = require("../../config/configProject")
 
-// 统计数据
+// 统计数据，后台用的
 router.get('/', (req, res, next) => {
     utility
         .verifyAuthorization(req)
@@ -16,7 +16,6 @@ router.get('/', (req, res, next) => {
                         SELECT
                           (SELECT COUNT(*) FROM diaries) as count_diary,
                           (SELECT COUNT(*) FROM qrs) as count_qr,
-                          (SELECT COUNT(*) FROM wubi_dict) as count_dict,
                           (SELECT COUNT(*) FROM users) as count_user,
                           (SELECT COUNT(*) FROM diary_category) as count_category,
                           (SELECT COUNT(*) FROM diaries where category = 'bill') as count_bill
@@ -26,10 +25,10 @@ router.get('/', (req, res, next) => {
                             SELECT
                               (SELECT COUNT(*) FROM diaries where uid = ${userInfo.uid}) as count_diary,
                               (SELECT COUNT(*) FROM qrs where uid = ${userInfo.uid}) as count_qr,
-                              (SELECT COUNT(*) FROM wubi_dict where uid = ${userInfo.uid}) as count_dict,
                               (SELECT COUNT(*) FROM users where uid = ${userInfo.uid}) as count_user,
                               (SELECT COUNT(*) FROM diary_category) as count_category,
-                              (SELECT COUNT(*) FROM diaries where uid = ${userInfo.uid} and category = 'bill') as count_bill
+                              (SELECT COUNT(*) FROM diaries where uid = ${userInfo.uid} and category = 'bill') as count_bill,
+                              (SELECT COUNT(*) FROM wubi_dict where uid = ${userInfo.uid}) as count_dict
                         `)
             }
             utility
@@ -41,8 +40,8 @@ router.get('/', (req, res, next) => {
                     res.send(new ResponseError('', err.message))
                 })
         })
-        .catch(err => {
-            res.send(new ResponseError('', '用户信息错误'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
         })
 })
 
@@ -85,8 +84,8 @@ router.get('/category', (req, res, next) => {
                     res.send(new ResponseError(err,))
                 })
         })
-        .catch(err => {
-            res.send(new ResponseError(err, '权限错误'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
         })
 })
 
@@ -132,42 +131,38 @@ router.get('/year', (req, res, next) => {
                     res.send(new ResponseError(err, err.message))
                 })
         })
-        .catch(err => {
-            res.send(new ResponseError(err, '权限错误'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
         })
 
 })
 
 // 用户统计信息
-router.get('/users', (req, res, next) => {
-    updateUsersInfo()
-        .then(() => {
-            utility
-                .verifyAuthorization(req)
-                .then(userInfo => {
-                    if (userInfo.email === configProject.adminCount) {
-                        let sqlArray = []
-                        sqlArray.push(`
-                                select uid, email, last_visit_time, nickname, register_time, count_diary, count_dict, sync_count
+router.get('/users', (req, res, next) => {utility
+    .verifyAuthorization(req)
+    .then(userInfo => {
+        if (userInfo.email === configProject.adminCount) {
+            let sqlArray = []
+            sqlArray.push(`
+                                select uid, email, last_visit_time, nickname, register_time, count_diary, count_dict, count_map_route, sync_count
                                 from users
                             `)
-                        utility
-                            .getDataFromDB('diary', sqlArray)
-                            .then(data => {
-                                res.send(new ResponseSuccess(data))
-                            })
-                            .catch(err => {
-                                res.send(new ResponseError(err, err.message))
-                            })
-                    } else {
-                        res.send(new ResponseError('', '没有权限查看此信息'))
-                    }
-
+            utility
+                .getDataFromDB('diary', sqlArray)
+                .then(data => {
+                    res.send(new ResponseSuccess(data))
                 })
                 .catch(err => {
                     res.send(new ResponseError(err, err.message))
                 })
-        })
+        } else {
+            res.send(new ResponseError('', '没有权限查看此信息'))
+        }
+
+    })
+    .catch(errInfo => {
+        res.send(new ResponseError('', errInfo))
+    })
 })
 
 // 气温统计
@@ -185,11 +180,10 @@ router.get('/weather', (req, res, next) => {
                     res.send(new ResponseError(err, '数据库请求错误'))
                 })
         })
-        .catch(err => {
-            res.send(new ResponseError(err, '权限错误'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
         })
 
 })
-
 
 module.exports = router

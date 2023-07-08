@@ -37,23 +37,43 @@ function getDataFromDB(dbName, sqlArray, isSingleValue) {
 
 // 验证用户是否有权限
 function verifyAuthorization(req){
-    let token = req.get(configProject.TOKEN_NAME) || req.query.token
+    let token = req.get('Diary-Token') || req.query.token
+    let uid = req.get('Diary-Uid')
     return new Promise((resolve, reject) => {
         if (!token){
             reject ('无 token')
+        } else if (!uid){
+            reject ('程序已升级，请关闭所有相关窗口，再重新访问该网站')
         } else {
             let sqlArray = []
-            sqlArray.push(`select * from users where password = '${token}'`)
+            sqlArray.push(`select * from users where password = '${token}' and uid = ${uid}`)
             getDataFromDB( 'diary', sqlArray, true)
                 .then(userInfo => {
-                    resolve(userInfo) // 如果查询成功，返回 用户id
+                    if (userInfo){
+                        resolve(userInfo) // 如果查询成功，返回 用户id
+                    } else {
+                        reject('身份验证失败：查无此人')
+                    }
                 })
                 .catch(err => {
-                    console.log('验证权限失败', err, err.message)
-                    reject('验证权限失败')
+                    reject('mysql: 获取身份信息错误')
                 })
         }
     })
+}
+
+function getMysqlConnection(dbName){
+    let connection = mysql.createConnection({
+        host:       configDatabase.host,
+        user:       configDatabase.user,
+        password:   configDatabase.password,
+        port:       configDatabase.port,
+        multipleStatements: configDatabase.multipleStatements, // 允许同时请求多条 sql 语句
+        timezone: configDatabase.timezone,
+        database: dbName
+    })
+    connection.connect()
+    return connection
 }
 
 
@@ -162,6 +182,7 @@ function formatMoney(number){
 
 module.exports = {
     getDataFromDB,
+    getMysqlConnection,
     dateFormatter, updateUserLastLoginTime,
     unicodeEncode, unicodeDecode,
     verifyAuthorization,

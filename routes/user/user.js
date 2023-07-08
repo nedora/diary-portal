@@ -149,8 +149,8 @@ router.post('/list', (req, res, next) => {
                     res.send(new ResponseError(err, err.message))
                 })
         })
-        .catch(verified => {
-            res.send(new ResponseError(verified, '无权查看用户列表：用户信息错误'))
+        .catch(errInfo => {
+            res.send(new ResponseError('', errInfo))
         })
 })
 
@@ -197,8 +197,8 @@ router.get('/detail', (req, res, next) => {
                             res.send(new ResponseError('','当前用户无权查看该 QR ：请求用户 ID 与 QR 归属不匹配'))
                         }
                     })
-                    .catch(unverified => {
-                        res.send(new ResponseError('','当前用户无权查看该 QR ：用户信息错误'))
+                    .catch(errInfo => {
+                        res.send(new ResponseError('', errInfo))
                     })
             }
         })
@@ -297,8 +297,6 @@ router.put('/set-profile', (req, res, next) => {
             res.send(new ResponseError(err, '无权操作'))
         })
 })
-
-
 
 
 router.put('/modify', (req, res, next) => {
@@ -420,7 +418,7 @@ router.put('/change-password', (req, res, next) => {
         .verifyAuthorization(req)
         .then(userInfo => {
             if (userInfo.email === 'test@163.com'){
-                res.send(new ResponseError('', '演示账户密码不允许修改'))
+                res.send(new ResponseError('', '演示帐户密码不允许修改'))
                 return
             }
             bcrypt.hash(req.body.password, 10, (err, encryptPasswordNew) => {
@@ -440,6 +438,61 @@ router.put('/change-password', (req, res, next) => {
             res.send(new ResponseError(err, '无权操作'))
         })
 
+})
+
+// 注销帐号
+router.delete('/destroy-account', (req, res, next) => {
+    utility
+        .verifyAuthorization(req)
+        .then(userInfo => {
+            // 演示帐户时不允许执行注销操作
+            if (userInfo.email === 'test@163.com'){
+                res.send(new ResponseError('', '演示帐户不允许执行此操作'))
+                return
+            }
+            let connection = utility.getMysqlConnection('diary')
+            connection.beginTransaction(transactionError => {
+                if (transactionError){
+                    connection.end()
+                    connection.rollback(err => {
+                        res.send(new ResponseError('', 'beginTransaction: 事务执行失败，已回滚'))
+                    })
+                } else {
+                    let sql = `
+                                delete from diaries where uid = ${userInfo.uid}; 
+                                delete from invitations where binding_uid = ${userInfo.uid}; 
+                                delete from map_pointer where uid = ${userInfo.uid}; 
+                                delete from map_route where uid = ${userInfo.uid}; 
+                                delete from map_route where uid = ${userInfo.uid}; 
+                                delete from qrs where uid = ${userInfo.uid}; 
+                                delete from users where uid = ${userInfo.uid}; 
+                                `
+                    connection.query(sql, [], (queryErr,result) => {
+                        if (queryErr){
+                            connection.rollback(err => {
+                                res.send(new ResponseError(queryErr, 'query: 事务执行失败，已回滚'))
+                            })
+                            // res.send(new ResponseError(err, '数据库请求错误'))
+                        } else {
+                            connection.commit(commitError => {
+                                if (commitError){
+                                    connection.rollback(err => {
+                                        res.send(new ResponseError(err, 'transaction.commit: 事务执行失败，已回滚'))
+                                    })
+                                } else {
+                                    res.send(new ResponseSuccess(result, '事务执行成功'))
+                                }
+                            })
+                        }
+                        connection.end()
+                    })
+                }
+
+            })
+        })
+        .catch(errInfo => {
+            res.send(new ResponseError('null', errInfo))
+        })
 })
 
 

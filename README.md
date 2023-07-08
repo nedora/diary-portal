@@ -90,8 +90,8 @@ module.exports = {
 和项目配置文件 `/config/configProject.js`
 ```js
 module.exports = {
-    invitation: '----', // 万能邀请码，用于注册时使用
-    adminCount: 'kylebing@163.com', // 管理员账户，该用户可以在统计页面中查看所有用户统计数据
+   invitation: '----', // 万能邀请码，用于注册时使用
+   adminCount: 'kylebing@163.com', // 管理员帐户，该用户可以在统计页面中查看所有用户统计数据
    TOKEN_NAME: 'Diary-Token', // header 中的 token 字段，跟前端约定的 token 名字，不需要刻意修改
 }
 ```
@@ -120,7 +120,6 @@ npm run start
 请先删除后台目录中的 `DATABASE_LOCK` 这个文件。  
 直接访问 `你服务器的域名或IP:3000/init` 这个路径即可将数据库初始化。  
 初始化数据库会自动创建一个为名 `diary` 的数据库
-
 
 初始化后，会自动在项目目录中新建一个名为 `DATABASE_LOCK` 的文件，之后将不能再执行这个接口，如果想要重新初始化，需要先将这个文件删除。
 
@@ -184,11 +183,10 @@ npm run start
 5. 将项目文件放置于服务器 nginx 主目录的 `/diary/` 下
 6. 此时后台项目在 `/portal/` 目录下，前端项目在 `/dairy/` 下，这样就能直接使用了
 
-
 ## 三、开发说明
 
 ### 1. 密码说明
-密码使用 [bcrypt](https://github.com/kelektiv/node.bcrypt.js) 加密，登录后的所有传输都会用加密后的密码作为请求 token  
+密码使用 [bcrypt](https://github.com/kelektiv/node.bcrypt.js) 加密，登录后的所有传输都会用加密后的密码作为请求 token
 token 放到请求头的 `Diary-Token` 字段中
 
 ### 2. 返回数据格式
