@@ -117,13 +117,13 @@ npm run start
 
 ### 4. 初始化数据库
 
-请先删除后台目录中的 `DATABASE_LOCK` 这个文件。  
-直接访问 `你服务器的域名或IP:3000/init` 这个路径即可将数据库初始化。  
-初始化数据库会自动创建一个为名 `diary` 的数据库
+> 注意：初始化会清空 `diary` 数据库中的所有内容
 
-初始化后，会自动在项目目录中新建一个名为 `DATABASE_LOCK` 的文件，之后将不能再执行这个接口，如果想要重新初始化，需要先将这个文件删除。
 
-> 注意：初始化会清空 diary 数据库中的所有内容
+1. 删除后台目录中的 `DATABASE_LOCK` 这个文件。  
+2. 直接访问 `你服务器的域名或IP:3000/init` 这个路径即可将数据库初始化，初始化数据库会自动创建一个为名 `diary` 的数据库。
+3. 初始化后，会自动在项目目录中新建一个名为 `DATABASE_LOCK` 的文件，之后将不能再执行这个接口，如果想再次初始化，需要先删除这个文件。
+
 
 
 ### 5. 配置 nginx，映射 `localhost:3000` 路径到  `/portal` 路径
@@ -175,7 +175,12 @@ npm run start
    systemctl restart cron
    ```
 
-### 6. 配置前端项目
+### 6. 设置管理员账户
+1. 用上面设置的通用邀请码注册之后
+2. 从数据库中直接修改对应用户的 `users.group_id`  改为 `1` (管理员)
+3. 网页上重新登录该用户，就能看到 **邀请码** 菜单了。
+
+### 7. 配置前端项目
 1. 下载 [https://github.com/KyleBing/diary-vue](https://github.com/KyleBing/diary-vue)
 2. 安装依赖，执行 `npm i` 或者 `yarn`
 3. 如果你需要修改前端请求后台的路径，修改 `/src/request.js` 中的 `BASE_URL` 即可
@@ -186,9 +191,7 @@ npm run start
 ## 三、开发说明
 
 ### 1. 密码说明
-密码使用 [bcrypt](https://github.com/kelektiv/node.bcrypt.js) 加密，登录后的所有传输都会用加密后的密码作为请求 token
-token 放到请求头的 `Diary-Token` 字段中
-
+密码使用 [bcrypt](https://github.com/kelektiv/node.bcrypt.js) 加密
 ### 2. 返回数据格式
 
 ```json
