@@ -125,13 +125,76 @@ CREATE TABLE \`users\`  (
   \`count_map_route\` int(8) NULL DEFAULT 0 COMMENT '数量 - 路线规划',
   \`sync_count\` int(6) NULL DEFAULT 0 COMMENT '同步次数',
   \`avatar\` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT 'avatar图片地址',
-  \`city\` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '城市',
+  \`city\` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '城市',
   \`geolocation\` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '经纬度',
   PRIMARY KEY (\`uid\`, \`email\`) USING BTREE,
   INDEX \`group_id\`(\`group_id\`) USING BTREE,
   INDEX \`uid\`(\`uid\`) USING BTREE,
   CONSTRAINT \`group_id\` FOREIGN KEY (\`group_id\`) REFERENCES \`user_group\` (\`id\`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Compact;
+
+
+-- ----------------------------
+-- Table structure for map_route
+-- ----------------------------
+DROP TABLE IF EXISTS \`map_route\`;
+CREATE TABLE \`map_route\` (
+  \`id\` int(11) NOT NULL AUTO_INCREMENT,
+  \`name\` varchar(255) NOT NULL COMMENT '路线名称',
+  \`area\` varchar(255) NOT NULL COMMENT '地址位置',
+  \`road_type\` varchar(255) NOT NULL COMMENT '路面类型',
+  \`seasons\` varchar(255) NOT NULL COMMENT '骑行季节',
+  \`video_link\` varchar(255) DEFAULT NULL COMMENT '视频链接',
+  \`paths\` longtext NOT NULL COMMENT '路线节点',
+  \`note\` longtext DEFAULT NULL COMMENT '备注',
+  \`date_init\` datetime DEFAULT NULL COMMENT '创建时间',
+  \`date_modify\` datetime DEFAULT NULL COMMENT '编辑时间',
+  \`thumb_up\` int(10) DEFAULT 0 COMMENT '点赞数',
+  \`uid\` int(11) DEFAULT NULL COMMENT 'user',
+  \`is_public\` int(1) NOT NULL DEFAULT 0 COMMENT '是否共享 0否 1是',
+  \`policy\` int(1) DEFAULT NULL COMMENT '路线规划策略',
+  PRIMARY KEY (\`id\`) USING BTREE,
+  KEY \`map_uid\` (\`uid\`) USING BTREE,
+  CONSTRAINT \`map_uid\` FOREIGN KEY (\`uid\`) REFERENCES \`users\` (\`uid\`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC;
+
+
+DROP TABLE IF EXISTS \`map_pointer\`;
+CREATE TABLE \`map_pointer\` (
+  \`id\` int(10) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  \`name\` varchar(255) NOT NULL COMMENT '标题',
+  \`pointers\` longtext NOT NULL COMMENT '地点信息数组数据',
+  \`note\` longtext DEFAULT NULL COMMENT '简介',
+  \`uid\` int(11) NOT NULL COMMENT '创建人',
+  \`date_create\` datetime NOT NULL COMMENT '创建时间',
+  \`date_modify\` datetime DEFAULT NULL COMMENT '编辑时间',
+  \`area\` varchar(255) DEFAULT NULL COMMENT '地域',
+  \`thumb_up\` int(10) DEFAULT NULL COMMENT '点赞数量',
+  \`is_public\` int(1) NOT NULL DEFAULT 0 COMMENT '公开与否',
+  \`visit_count\` int(9) DEFAULT NULL COMMENT '访问次数',
+  PRIMARY KEY (\`id\`) USING BTREE,
+  KEY \`userId\` (\`uid\`),
+  CONSTRAINT \`userId\` FOREIGN KEY (\`uid\`) REFERENCES \`users\` (\`uid\`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC;
+
+
+-- ----------------------------
+-- Table structure for file_manager
+-- ----------------------------
+DROP TABLE IF EXISTS \`file_manager\`;
+CREATE TABLE \`file_manager\` (
+  \`id\` int(100) NOT NULL AUTO_INCREMENT COMMENT 'hash',
+  \`name_original\` varchar(255) NOT NULL COMMENT '原文件名',
+  \`path\` varchar(255) DEFAULT NULL COMMENT '文件路径',
+  \`description\` varchar(255) DEFAULT NULL COMMENT '描述',
+  \`date_create\` datetime NOT NULL COMMENT '创建时间',
+  \`type\` varchar(255) NOT NULL DEFAULT 'image' COMMENT 'image, file',
+  \`uid\` int(11) NOT NULL COMMENT 'uid',
+  \`size\` int(10) NOT NULL COMMENT '文件大小',
+  PRIMARY KEY (\`id\`) USING BTREE,
+  KEY \`uid link\` (\`uid\`),
+  CONSTRAINT \`uid link\` FOREIGN KEY (\`uid\`) REFERENCES \`users\` (\`uid\`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC;
 
 
 -- ----------------------------
@@ -174,19 +237,21 @@ DROP TABLE IF EXISTS \`diaries\`;
 CREATE TABLE \`diaries\`  (
   \`id\` int(11) NOT NULL AUTO_INCREMENT,
   \`date\` datetime(0) NOT NULL COMMENT '日记日期',
-  \`title\` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '标题',
-  \`content\` longtext CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '内容',
+  \`title\` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '标题',
+  \`content\` longtext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL COMMENT '内容',
   \`temperature\` int(3) NULL DEFAULT -273 COMMENT '室内温度',
   \`temperature_outside\` int(3) NULL DEFAULT -273 COMMENT '室外温度',
-  \`weather\` enum('sunny','cloudy','overcast','sprinkle','rain','thunderstorm','fog','snow','tornado','smog','sandstorm') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'sunny' COMMENT '天气',
-  \`category\` enum('life','study','film','game','work','sport','bigevent','week','article') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'life' COMMENT '类别',
+  \`weather\` enum('sunny','cloudy','overcast','sprinkle','rain','thunderstorm','fog','snow','tornado','smog','sandstorm') CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'sunny' COMMENT '天气',
+  \`category\` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'life' COMMENT '类别',
   \`date_create\` datetime(0) NOT NULL COMMENT '创建日期',
   \`date_modify\` datetime(0) NULL DEFAULT NULL COMMENT '编辑日期',
   \`uid\` int(11) NOT NULL COMMENT '用户id',
   \`is_public\` int(1) NOT NULL DEFAULT 0 COMMENT '是否共享',
   \`is_markdown\` int(1) NOT NULL DEFAULT 0 COMMENT '是否为 Markdown',
-  PRIMARY KEY (\`id\`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET utf8 COLLATE utf8_general_ci ROW_FORMAT = Compact;
+  PRIMARY KEY (\`id\`) USING BTREE,
+  INDEX \`category_link\`(\`category\`) USING BTREE,
+  CONSTRAINT \`category_link\` FOREIGN KEY (\`category\`) REFERENCES \`diary_category\` (\`name_en\`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for qrs
@@ -252,6 +317,21 @@ CREATE TABLE \`thumbs_up\` (
   \`date_init\` datetime NOT NULL COMMENT '添加地址',
   PRIMARY KEY (\`name\`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
+
+
+-- ----------------------------
+-- Table structure for image_qiniu
+-- ----------------------------
+DROP TABLE IF EXISTS \`image_qiniu\`;
+CREATE TABLE \`image_qiniu\` (
+  \`id\` varchar(100) NOT NULL COMMENT 'hash',
+  \`description\` varchar(255) DEFAULT NULL COMMENT '描述',
+  \`date_create\` datetime NOT NULL COMMENT '创建时间',
+  \`type\` varchar(255) NOT NULL DEFAULT 'image' COMMENT 'image, file',
+  \`bucket\` varchar(255) NOT NULL COMMENT 'Bucket name',
+  \`base_url\` varchar(255) NOT NULL COMMENT 'base url',
+  PRIMARY KEY (\`id\`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC;
 
 
 SET FOREIGN_KEY_CHECKS = 1;
